@@ -8,10 +8,10 @@ public class PostgresRepository
     
     public PostgresRepository()
     {
-        var secretPassword = "0000";
-        var host = "localhost";
-        var databaseName = "postgres";
-        var userName = "postgres";
+        var secretPassword = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "0000";
+        var host = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "localhost";
+        var databaseName = Environment.GetEnvironmentVariable("POSTGRES_DATABASE") ?? "postgres";
+        var userName = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "postgres";
         _connectionString =
             $"Host={host};Username={userName};Password={secretPassword};Database={databaseName}";
     }

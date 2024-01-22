@@ -11,7 +11,8 @@ public class RedisRepository
     
     public RedisRepository()
     {
-        var result = ConnectionMultiplexer.Connect("localhost:6379");
+        var host = Environment.GetEnvironmentVariable("REDIS_HOST") ?? "localhost:6379";
+        var result = ConnectionMultiplexer.Connect(host);
         _db =  result.GetDatabase();
     }
     
