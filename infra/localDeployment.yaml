@@ -47,37 +47,18 @@ spec:
             - name: REDIS_HOST
               value: redis-service
 ---
-apiVersion: apps/v1
-kind: StatefulSet
+apiVersion: v1
+kind: Service
 metadata:
-  name: redis
+  name: gke-poc-service
 spec:
-  serviceName: "redis"
-  replicas: 1
+  type: LoadBalancer
   selector:
-    matchLabels:
-      app: redis
-  template:
-    metadata:
-      labels:
-        app: redis
-    spec:
-      containers:
-        - name: redis
-          image: redis:latest
-          ports:
-            - containerPort: 6379
-          volumeMounts:
-            - name: redis-storage
-              mountPath: /data
-  volumeClaimTemplates:
-    - metadata:
-        name: redis-storage
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: 500Mi
+    app: gke-poc
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -128,6 +109,38 @@ spec:
   selector:
     app: postgres
 ---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redis
+spec:
+  serviceName: "redis"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:latest
+          ports:
+            - containerPort: 6379
+          volumeMounts:
+            - name: redis-storage
+              mountPath: /data
+  volumeClaimTemplates:
+    - metadata:
+        name: redis-storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 500Mi
+---
 apiVersion: v1
 kind: Service
 metadata:
@@ -138,16 +151,3 @@ spec:
     - port: 6379
   selector:
     app: redis
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: gke-poc-service
-spec:
-  type: LoadBalancer
-  selector:
-    app: gke-poc
-  ports:
-    - protocol: TCP
-      port: 80
-      targetPort: 80
