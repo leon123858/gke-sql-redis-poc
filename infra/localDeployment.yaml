@@ -1,3 +1,20 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: gke-poc-secret
+type: Opaque
+data:
+  postgres-password: "MDAwMA==" # 0000's base64 encoding
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gke-poc-config
+data:
+  POSTGRES_PASSWORD: "0000"
+  POSTGRES_DATABASE: "postgres"
+  POSTGRES_USER: "postgres"
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -17,15 +34,17 @@ spec:
           image: leon1234858/gke-poc:latest
           ports:
             - containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: gke-poc-config
           env:
             - name: POSTGRES_PASSWORD
-              value: "0000"
+              valueFrom:
+                secretKeyRef:
+                  name: gke-poc-secret
+                  key: postgres-password
             - name: POSTGRES_HOST
               value: postgres-service
-            - name: POSTGRES_DATABASE
-              value: postgres
-            - name: POSTGRES_USER
-              value: postgres
             - name: REDIS_HOST
               value: redis-service
 ---
@@ -86,7 +105,10 @@ spec:
               mountPath: /var/lib/postgresql/data
           env:
             - name: POSTGRES_PASSWORD
-              value: "0000"
+              valueFrom:
+                secretKeyRef:
+                  name: gke-poc-secret
+                  key: postgres-password
   volumeClaimTemplates:
     - metadata:
         name: postgres-storage
