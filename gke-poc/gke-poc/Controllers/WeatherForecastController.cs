@@ -39,4 +39,22 @@ public class WeatherForecastController : ControllerBase
             throw new Exception("Failed to set weatherforecast");
         return newCache;
     }
+    
+    [HttpPost(Name = "PostWeatherForecast")]
+    public  IEnumerable<WeatherForecast> Post()
+    {
+        var rng = new Random();
+        var weatherForecast = new WeatherForecast
+        {
+            Date = DateTime.Now,
+            TemperatureC = rng.Next(-20, 55),
+            Summary = Summaries[rng.Next(Summaries.Length)]
+        };
+        // init postgres table
+        _postgresRepository.InitTable();
+        // save to postgres
+        var dbResult = _postgresRepository.PostAsync(weatherForecast).Result;
+        if (dbResult == null) throw new Exception("Failed to post weatherforecast");
+        return Get();
+    }
 }

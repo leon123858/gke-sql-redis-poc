@@ -1,5 +1,5 @@
 -- 创建 WeatherForecast 表
-CREATE TABLE WeatherForecast
+CREATE TABLE IF NOT EXISTS WeatherForecast
 (
     Id SERIAL PRIMARY KEY,
     Date DATE,

@@ -20,7 +20,7 @@ public class PostgresRepository
     {
         await using var connection = new NpgsqlConnection(_connectionString);
         await connection.OpenAsync();
-        await using var cmd = new NpgsqlCommand("SELECT * FROM weatherforecast", connection);
+        await using var cmd = new NpgsqlCommand("SELECT * FROM WeatherForecast", connection);
         await using var reader = await cmd.ExecuteReaderAsync();
         var result = new List<WeatherForecast>();
         while (await reader.ReadAsync())
@@ -34,6 +34,33 @@ public class PostgresRepository
         }
         await connection.CloseAsync();
         return result;
+    }
+
+    public async void InitTable()
+    {
+        await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync();
+        await using var cmd = new NpgsqlCommand("CREATE TABLE IF NOT EXISTS WeatherForecast (id SERIAL PRIMARY KEY, date DATE, temperatureC INT, summary VARCHAR(255))", connection);
+        await cmd.ExecuteNonQueryAsync();
+        await connection.CloseAsync();
+    }
+    
+    public async Task<WeatherForecast?> PostAsync(WeatherForecast weatherForecast)
+    {
+        await using var connection = new NpgsqlConnection(_connectionString);
+        await connection.OpenAsync();
+        await using var cmd = new NpgsqlCommand("INSERT INTO WeatherForecast (date, temperatureC, summary) VALUES (@date, @temperatureC, @summary) RETURNING id", connection);
+        cmd.Parameters.AddWithValue("date", weatherForecast.Date);
+        cmd.Parameters.AddWithValue("temperatureC", weatherForecast.TemperatureC);
+        cmd.Parameters.AddWithValue("summary", weatherForecast.Summary);
+        var id = await cmd.ExecuteScalarAsync();
+        await connection.CloseAsync();
+        return new WeatherForecast
+        {
+            Date = weatherForecast.Date,
+            TemperatureC = weatherForecast.TemperatureC,
+            Summary = weatherForecast.Summary
+        };
     }
 
 }

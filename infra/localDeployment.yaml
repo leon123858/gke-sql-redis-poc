@@ -14,10 +14,9 @@ spec:
     spec:
       containers:
         - name: gke-poc
-          image: gke-poc
-          imagePullPolicy: Never
+          image: leon1234858/gke-poc:latest
           ports:
-            - containerPort: 8080
+            - containerPort: 80
           env:
             - name: POSTGRES_PASSWORD
               value: "0000"
@@ -130,4 +129,4 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: 8080
+      targetPort: 80
